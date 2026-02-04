@@ -3,7 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <title>電子發票法規查詢</title>
+
+  <style>
+    .highlight {
+      background-color: yellow;
+      font-weight: bold;
+    }
+  </style>
 </head>
+
 <script>
 const laws = [
   {
@@ -478,8 +486,15 @@ const laws = [
 }
 ];
 
+function highlight(text, keyword) {
+  if (!keyword) return text;
+  const regex = new RegExp(`(${keyword})`, "g");
+  return text.replace(regex, `<span class="highlight">$1</span>`);
+}
+
 function searchLaw() {
   const keyword = document.getElementById("keyword").value.trim();
+  const lawFilter = document.getElementById("lawFilter").value;
   const resultDiv = document.getElementById("result");
   resultDiv.innerHTML = "";
 
@@ -488,42 +503,66 @@ function searchLaw() {
     return;
   }
 
-  laws.forEach(law => {
-    if (law.content.includes(keyword)) {
+laws.forEach(law => {
+
+  if (lawFilter !== "all" && law.law !== lawFilter) {
+    return;
+  }
+
+  if (law.content.includes(keyword)) {
       resultDiv.innerHTML += `
         <p>
           <strong>[${law.law} ${law.article}]</strong><br>
-          ${law.content}
+          ${highlight(law.content, keyword)}
         </p>
       `;
     }
   });
 
-  if (resultDiv.innerHTML === "") {
-    resultDiv.innerHTML = "<p>查無符合條文</p>";
-  }
+if (resultDiv.innerHTML === "") {
+  resultDiv.innerHTML = `
+    <p style="font-weight: bold; margin-bottom: 32px; color: #8B0000;">
+      查無符合條文，請檢查用字或參考上方法規連結。
+    </p>
+
+    <p style="font-size: 14px;"><br>
+      例：「境外電商」於加值型及非加值型營業稅法之定義為：<br>
+      <u>
+        第 6 條（營業人之定義）四、外國之事業、機關、團體、組織，在中華民國境內無固定營業場所，經由網際網路或其他數位方式銷售電子勞務予境內自然人。
+      </u><br><br>
+      於統一發票使用辦法中代稱為：本法第六條第四款
+    </p>
+  `;
+}
 }
 </script>
 
 <body>
 <h1>
   電子發票相關法規查詢
-  <span style="margin-left: 12px;">
+  <span style="margin-left: 12px; font-size: 14px;">
+    法規連結：
     <a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=G0340082"
        target="_blank"
-       style="font-size: 14px; padding: 4px 8px; border: 1px solid #ccc; text-decoration: none; margin-right: 4px;">
+       style="padding: 4px 8px; border: 1px solid #ccc; text-decoration: none; margin-right: 4px;">
       統一發票使用辦法
     </a>
     <a href="https://law-out.mof.gov.tw/LawContent.aspx?id=FL006082"
        target="_blank"
-       style="font-size: 14px; padding: 4px 8px; border: 1px solid #ccc; text-decoration: none;">
+       style="padding: 4px 8px; border: 1px solid #ccc; text-decoration: none;">
       加值型及非加值型營業稅法
     </a>
   </span>
 </h1>
 
-  <input type="text" id="keyword" placeholder="請輸入關鍵字，例如：彙開">
-  <button onclick="searchLaw()">查詢</button>
+<select id="lawFilter">
+  <option value="all">全部法規</option>
+  <option value="統一發票使用辦法">統一發票使用辦法</option>
+  <option value="加值型及非加值型營業稅法">加值型及非加值型營業稅法</option>
+</select>
+
+<input type="text" id="keyword" placeholder="請輸入關鍵字，例如：彙開">
+<button onclick="searchLaw()">查詢</button>
 
   <hr>
 
